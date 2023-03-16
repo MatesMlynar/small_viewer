@@ -7,7 +7,6 @@ class RoomListPage extends CRUDPage
 
     protected function pageBody(): string
     {
-
         $html = $this->alert();
 
         //získám data o místnostech

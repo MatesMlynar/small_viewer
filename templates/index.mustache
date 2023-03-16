@@ -1,0 +1,26 @@
+<div class="index">
+
+    <div class="index__img-figure">
+        <img class="index__img" src="/public/img/background/background.svg">
+    </div>
+
+    <div class="index__form-container">
+
+        <h3 class="index__form-title">Přihlašovací formulář</h3>
+
+        <form class="index__form" method="post">
+            {{#errors.userNotFound}} <div class="d-block invalid-feedback">{{errors.userNotFound}}</div> {{/errors.userNotFound}}
+            {{#errors.login}} <div class="d-block invalid-feedback">{{errors.login}}</div> {{/errors.login}}
+            <input type="text" class="index__form-input" name="login" id="login"  placeholder="Uživatelské jméno">
+
+            {{#errors.password}} <div class="d-block invalid-feedback">{{errors.password}}</div> {{/errors.password}}
+            <input type="text" class="index__form-input" name="password" id="password"  placeholder="Heslo">
+
+            <button class="index__form-button" type="submit">PŘIHLÁSIT SE</button>
+        </form>
+
+    </div>
+
+
+
+</div>
