@@ -36,19 +36,36 @@ class User
             $this->room = $rawData['room'];
     }
 
-    public static function findByLogin(string $login, &$errors) : User|null
+    public static function findByLogin(string $login, string $passwordPOST, &$errors) : User|null
     {
         $pdo = PDOProvider::get();
-        $stmt = $pdo->prepare("SELECT * FROM `employee` WHERE `login`=:login");
-        $stmt->execute(['login' => $login]);
+        $user = $pdo->prepare("SELECT * FROM `employee` WHERE `login`=:login");
+        $user->execute(['login' => $login]);
 
-        if($stmt->rowCount() < 1)
+        if($user->rowCount() < 1)
         {
             $errors['userNotFound'] = "Učet s těmito přihlašovacími údaji nebyl nalezen";
             return null;
         }
+        else
+        {
+            $user = $user->fetch(PDO::FETCH_ASSOC);
 
-        return new User($stmt->fetch(PDO::FETCH_ASSOC));
+            $userPasswordInDB = $user['password'];
+
+            //porovnání hesel
+            if(password_verify($passwordPOST, $userPasswordInDB))
+            {
+                return new User($user);
+            }
+            else{
+                $errors['password'] = "Špatné heslo";
+                return null;
+            }
+
+        }
+
+        return null;
     }
     
     public static function validateLogin($request, &$errors)
@@ -61,5 +78,9 @@ class User
         return count($errors) === 0;
     }
 
+    public function isAdmin() : bool
+    {
+        return $this->admin === 1;
+    }
 
 }

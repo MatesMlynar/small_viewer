@@ -4,23 +4,25 @@ require_once "../bootstrap/bootstrap.php";
 class IndexPage extends AuthenticatePage
 {
     public string $title = "Prohlížeč databáze";
-    private ?User $user;
     private array $errors;
 
     protected function prepareData(): void
     {
-        parent::prepareData();
-
         $this->errors = [];
         if($_POST){
 
             if(User::validateLogin($_POST, $this->errors))
             {
                 $userLogin = filter_input(INPUT_POST, "login");
-                $this->user = User::findByLogin($userLogin, $this->errors);
+                $userPassword = filter_input(INPUT_POST, "password");
+                $this->user = User::findByLogin($userLogin,$userPassword, $this->errors);
 
                 if(isset($this->user))
                 {
+                    session_start();
+                    $_SESSION['userName'] = $this->user->name . " " . $this->user->surname;
+                    $_SESSION['admin'] = $this->user->isAdmin();
+                    //presmerujeme
                     header("Location: /room/list.php");
                     exit;
                 }

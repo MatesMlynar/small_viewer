@@ -1,14 +1,16 @@
 <?php
 
+
 abstract class AuthenticatePage extends Page
 {
-
-
-
-    protected function isLogged()
+    protected function prepareData(): void
     {
-        header("Location: index.php".http_build_query(['action' => ""]));
-        exit();
+        session_start();
+        if(!isset($_SESSION['userName']))
+        {
+            header("Location: ../index.php?".http_build_query(['action' => "unauthenticated"]));
+            exit();
+        }
     }
 }
 

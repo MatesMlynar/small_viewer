@@ -5,6 +5,11 @@ class RoomListPage extends CRUDPage
 {
     public string $title = "Seznam místností";
 
+    protected function prepareData(): void
+    {
+        parent::prepareData();
+    }
+
     protected function pageBody(): string
     {
         $html = $this->alert();

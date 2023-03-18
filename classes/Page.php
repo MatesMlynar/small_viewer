@@ -3,6 +3,7 @@
 abstract class Page
 {
     public string $title;
+    protected ?User $user;
 
     protected function prepareData() : void {
 
@@ -17,7 +18,17 @@ abstract class Page
     }
 
     protected function pageHeader() : string {
-        return MustacheProvider::get()->render("page_header", []);
+        $userName = "";
+        $isLogged = false;
+
+        if(isset($_SESSION['userName']))
+        {
+            $userName = $_SESSION['userName'];
+            $isLogged = true;
+        }
+
+
+        return MustacheProvider::get()->render("page_header", ["userName" => $userName, "loggedIn" => $isLogged]);
     }
 
     protected abstract function pageBody() : string;
