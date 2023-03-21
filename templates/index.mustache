@@ -9,9 +9,18 @@
         <h3 class="index__form-title">Přihlašovací formulář</h3>
 
         <form class="index__form" method="post">
+
             {{#errors.userNotFound}} <div class="d-block invalid-feedback">{{errors.userNotFound}}</div> {{/errors.userNotFound}}
             {{#errors.login}} <div class="d-block invalid-feedback">{{errors.login}}</div> {{/errors.login}}
-            <input type="text" class="index__form-input" name="login" id="login"  placeholder="Uživatelské jméno">
+
+            {{#predefinedLogin}}
+                <input type="text" class="index__form-input" name="login" id="login"  placeholder="Uživatelské jméno" value={{predefinedLogin}}>
+            {{/predefinedLogin}}
+
+            {{^predefinedLogin}}
+                <input type="text" class="index__form-input" name="login" id="login"  placeholder="Uživatelské jméno">
+            {{/predefinedLogin}}
+
 
             {{#errors.password}} <div class="d-block invalid-feedback">{{errors.password}}</div> {{/errors.password}}
             <input type="password" class="index__form-input" name="password" id="password"  placeholder="Heslo">

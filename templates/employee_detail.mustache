@@ -1,0 +1,24 @@
+<div class="container">
+
+    <h1>Detail zaměstnance {{name}} {{surname}}</h1>
+    <dl>
+        {{#employee}}
+            <dt>Jméno</dt>
+            <dd>{{name}}</dd>
+
+            <dt>Příjmení</dt>
+            <dd>{{surname}}</dd>
+
+            <dt>Pozice</dt>
+            <dd>{{job}}</dd>
+
+            <dt>Mzda</dt>
+            <dd>{{wage}}</dd>
+
+            {{{employee_keys}}}
+
+        {{/employee}}
+    </dl>
+
+</div>
+

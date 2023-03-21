@@ -27,7 +27,6 @@ abstract class Page
             $isLogged = true;
         }
 
-
         return MustacheProvider::get()->render("page_header", ["userName" => $userName, "loggedIn" => $isLogged]);
     }
 

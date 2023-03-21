@@ -1,9 +1,9 @@
 <?php
 require_once "../../bootstrap/bootstrap.php";
 
-class RoomDetailPage extends Page
+class RoomDetailPage extends AuthenticatePage
 {
-//    public string $title = "Seznam místností";
+    public string $title = "Detail místností";
     private $room;
     private $employees;
 

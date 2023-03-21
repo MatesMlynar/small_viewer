@@ -1,9 +1,9 @@
 <?php
 require_once "../../bootstrap/bootstrap.php";
 
-class RoomListPage extends CRUDPage
+class EmployeeListPage extends CRUDPage
 {
-    public string $title = "Seznam místností";
+    public string $title = "Seznam zaměstnanců";
 
     protected function prepareData(): void
     {
@@ -12,14 +12,13 @@ class RoomListPage extends CRUDPage
 
     protected function pageBody(): string
     {
-        $html = $this->alert();
+      $html = $this->alert();
 
-        //získám data o místnostech
-        $rooms = Room::all();
-        $html .= MustacheProvider::get()->render("room_list", ["rooms" => $rooms, 'admin' => $_SESSION['admin']]);
-        //vyrenderuju
+      //získat data o zaměstnancích
+      $employees = Employee::all();
+      $html .= MustacheProvider::get()->render("employee_list", ["employees" => $employees, "admin" => $_SESSION['admin']]);
 
-        return $html;
+      return $html;
     }
 
     private function alert() : string
@@ -36,12 +35,12 @@ class RoomListPage extends CRUDPage
             case self::ACTION_INSERT:
                 if ($success === 1)
                 {
-                    $data['message'] = 'Mistnost byla založena';
+                    $data['message'] = 'Osoba byla vytvořena';
                     $data['alertType'] = 'success';
                 }
                 else
                 {
-                    $data['message'] = 'Chyba při založení místnosti';
+                    $data['message'] = 'Chyba při vytvoření osoby';
                     $data['alertType'] = 'danger';
                 }
                 break;
@@ -49,12 +48,12 @@ class RoomListPage extends CRUDPage
             case self::ACTION_DELETE:
                 if ($success === 1)
                 {
-                    $data['message'] = 'Mistnost byla smazána';
+                    $data['message'] = 'Osoba byla odebrána';
                     $data['alertType'] = 'success';
                 }
                 else
                 {
-                    $data['message'] = 'Chyba při mazání místnosti';
+                    $data['message'] = 'Chyba při odebrání osoby';
                     $data['alertType'] = 'danger';
                 }
                 break;
@@ -62,7 +61,9 @@ class RoomListPage extends CRUDPage
 
         return MustacheProvider::get()->render("alert", $data);
     }
+
+
 }
 
-$page = new RoomListPage();
+$page = new EmployeeListPage();
 $page->render();

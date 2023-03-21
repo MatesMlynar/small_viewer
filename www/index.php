@@ -5,6 +5,7 @@ class IndexPage extends AuthenticatePage
 {
     public string $title = "Prohlížeč databáze";
     private array $errors;
+    private $predefinedFormLogin = "";
 
     protected function prepareData(): void
     {
@@ -28,12 +29,9 @@ class IndexPage extends AuthenticatePage
                 }
             }
 
-
+            $this->predefinedFormLogin = $userLogin;
         }
-
-
     }
-
 
     protected function pageBody(): string
     {
@@ -41,7 +39,7 @@ class IndexPage extends AuthenticatePage
 
         /*$rooms = Room::all(['phone' => 'DESC']);*/
 
-        $html .= MustacheProvider::get()->render("index", ['errors' => $this->errors]);
+        $html .= MustacheProvider::get()->render("index", ['errors' => $this->errors, 'predefinedLogin' => $this->predefinedFormLogin]);
 
         return $html;
     }
