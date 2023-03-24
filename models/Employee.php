@@ -80,9 +80,15 @@ class Employee
 
     public static function deleteById($id) : bool
     {
-        $query = "DELETE FROM employee WHERE employee_id=:employeeID";
-
         $pdo = PDOProvider::get();
+
+        //smazat všechny klíče, které jsou propojeny s daty v tabulce "employee"
+        $keyQuery = "DELETE FROM `key` WHERE employee=:employeeID";
+        $keySTMT = $pdo->prepare($keyQuery);
+        $keySTMT->execute(['employeeID' => $id]);
+
+        //smazat samotnou osobu
+        $query = "DELETE FROM employee WHERE employee_id=:employeeID";
 
         $stmt = $pdo->prepare($query);
         return $stmt->execute(['employeeID' => $id]);
@@ -136,28 +142,10 @@ class Employee
 
     public function insert() : bool
     {
-        $success = false;
-
+        $pdo = PDOProvider::get();
 
         //budeme vkladat vse krome klice do tabulky employee
         $employeeTableQuery = "INSERT INTO employee (`name`, `surname`, `room`, `job`, `wage`) VALUES (:name, :surname, :room, :job, :wage);";
-        $pdo = PDOProvider::get();
-
-        //do tabulky key budeme vkladat data na zaklade employee_id a room_id
-
-        //1.) získáme uživatele podle "name" a "surname" //TODO dodělat login a password (pro uniq)
-        $employeeIDQuery = "SELECT employee_id from employee where `name` = :name AND `surname` = :surname";
-        $employee_id = $pdo->prepare($employeeIDQuery);
-        $employee_id->execute(['name' => $this->name, 'surname' => $this->surname]);
-        $finalEmployeeID = $employee_id->fetch(PDO::FETCH_ASSOC);
-
-        //2.) projdeme cyklem pole "employee_keys" a v každé iteraci uděláme dotaz do DB pro vložení
-
-
-
-        $keyTableQuery = "";
-
-
 
         $employeeTableData = $pdo->prepare($employeeTableQuery);
         $success = $employeeTableData->execute([
@@ -168,7 +156,16 @@ class Employee
             'wage' => $this->wage,
         ]);
 
+        //ziskame id zaměstnance (slouží pro přidání dat do tabulky keys)
+        $employee_id = $pdo->query("SELECT max(employee_id) as max_id FROM employee");
+        $employee_id = $employee_id->fetch(PDO::FETCH_ASSOC);
+        $employee_id = $employee_id['max_id'];
 
+        foreach ($this->employee_keys as $key)
+        {
+            $keyTableQuery = $pdo->prepare("INSERT INTO `key` (`room`, `employee`) VALUES (:room, :employee)");
+            $keyTableQuery->execute(['room' => $key, 'employee' => $employee_id]);
+        }
 
         return $success;
     }
