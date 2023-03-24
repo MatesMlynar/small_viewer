@@ -3,9 +3,7 @@ require_once "../../bootstrap/bootstrap.php";
 
 class EmployeeDetailPage extends AuthenticatePage
 {
-    private $employee;
-
-
+    private Employee $employee;
 
     protected function prepareData(): void
     {
@@ -31,7 +29,7 @@ class EmployeeDetailPage extends AuthenticatePage
 
     protected function pageBody(): string
     {
-       return MustacheProvider::get()->render("employee_detail", ["employee" => $this->employee]);
+        return MustacheProvider::get()->render("employee_detail", ["employee" => $this->employee]);
     }
 
 

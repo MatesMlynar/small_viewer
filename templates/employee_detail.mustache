@@ -9,14 +9,19 @@
             <dt>Příjmení</dt>
             <dd>{{surname}}</dd>
 
+            <dt>Místnost</dt>
+            <dd>{{room_name}}</dd>
+
             <dt>Pozice</dt>
             <dd>{{job}}</dd>
 
             <dt>Mzda</dt>
             <dd>{{wage}}</dd>
 
-            {{{employee_keys}}}
-
+            <dt>Klíče</dt>
+            {{#employee_keys}}
+                <a href='/room/detail.php?room_id={{room_id}}'>{{keys}}</a> <br>
+            {{/employee_keys}}
         {{/employee}}
     </dl>
 

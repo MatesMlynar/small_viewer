@@ -9,7 +9,6 @@ class LogoutPage extends AuthenticatePage
     protected function prepareData(): void
     {
         parent::prepareData();
-        session_start();
         session_destroy();
 
         $this->user = null;

@@ -6,7 +6,6 @@ class Room
     public ?string $phone;
     public ?string $no;
 
-    private static string $table = 'room';
 
     public function __construct(array $rawData = [])
     {
@@ -18,11 +17,11 @@ class Room
      * @param $sort
      * @return Room[]
      */
-    public static function all(array $sort = []) : array
+    public static function all() : array
     {
         $pdo = PDOProvider::get();
 
-        $query = "SELECT * FROM `" . self::$table . "` " . self::sortSQL($sort);
+        $query = "SELECT * FROM room";
         $stmt = $pdo->query($query);
 
         $result = [];
@@ -32,14 +31,12 @@ class Room
         return $result;
     }
 
-//    public static function find($conditions, $sort){
-//    }
 
     //vrátí objekt místnosti podle předaného ID
     public static function findByID(int $id) : Room|null
     {
         $pdo = PDOProvider::get();
-        $query = "SELECT * FROM `" . self::$table . "` WHERE `room_id` = $id";
+        $query = "SELECT * FROM room WHERE `room_id` = $id";
         $stmt = $pdo->query($query);
 
         if ($stmt->rowCount() < 1)
@@ -68,17 +65,6 @@ class Room
         }
     }
 
-    private static function sortSQL(array $sort) : string
-    {
-        if (!$sort)
-            return "";
-
-        $sqlChunks = [];
-        foreach ($sort as $column => $direction){
-            $sqlChunks[] = "`$column` $direction";
-        }
-        return "ORDER BY " . implode(" ", $sqlChunks);
-    }
 
     public static function readPost() : Room
     {
@@ -141,8 +127,6 @@ class Room
 
     }
 
-
-
     public static function deleteById(int $roomId) : bool
     {
         $query = "DELETE FROM `".self::$table."` WHERE `room_id` = :roomId";
@@ -153,10 +137,5 @@ class Room
         return $stmt->execute([
             'roomId' => $roomId,
         ]);
-    }
-
-    public function delete() : bool
-    {
-        return static::deleteById($this->room_id);
     }
 }

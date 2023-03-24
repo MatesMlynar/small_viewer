@@ -1,39 +1,9 @@
 <?php
 
-class User
+class User extends Employee
 {
-    public ?int $employee_id;
-    public ?int $admin;
-    public ?string $login;
-    public ?string $name;
-    public ?string $surname;
-    public ?string $job;
-    public ?int $wage;
-    public ?int $room;
-
-
     public function __construct(array $rawData = []){
-        $this->hydrate($rawData);
-    }
-
-    private function hydrate(array $rawData) : void
-    {
-        if (array_key_exists('employee_id', $rawData))
-            $this->employee_id = $rawData['employee_id'];
-        if(array_key_exists('admin', $rawData))
-            $this->admin = $rawData['admin'];
-        if(array_key_exists('login', $rawData))
-            $this->login = $rawData['admin'];
-        if(array_key_exists('name', $rawData))
-            $this->name = $rawData['name'];
-        if(array_key_exists('surname', $rawData))
-            $this->surname = $rawData['surname'];
-        if(array_key_exists('job', $rawData))
-            $this->job = $rawData['job'];
-        if(array_key_exists('wage', $rawData))
-            $this->wage = $rawData['wage'];
-        if(array_key_exists('room', $rawData))
-            $this->room = $rawData['room'];
+        parent::__construct($rawData);
     }
 
     public static function findByLogin(string $login, string $passwordPOST, &$errors) : User|null

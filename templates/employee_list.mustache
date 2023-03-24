@@ -24,13 +24,13 @@
                         {{^admin}}
                             <input type="submit" value="Editovat" class="btn btn-info" disabled>
                         {{/admin}}
-                        <input type="hidden" name="room_id" value="{{room_id}}">
+                        <input type="hidden" name="employee_id" value="{{room_id}}">
                     </form>
                 </td>
                 <td>
                     <form method="post" action="delete.php">
                         <input type="submit" value="Smazat" class="btn btn-danger" onclick="return confirm('Opravdu chcete odebrat zaměstnance?')">
-                        <input type="hidden" name="room_id" value="{{room_id}}">
+                        <input type="hidden" name="employee_id" value="{{employee_id}}">
                     </form>
                 </td>
             </tr>
