@@ -14,10 +14,16 @@ class EmployeeListPage extends CRUDPage
     {
       $html = $this->alert();
 
+
+
       //získat data o zaměstnancích
       $employees = Employee::all();
-      $html .= MustacheProvider::get()->render("employee_list", ["employees" => $employees, "admin" => $_SESSION['admin']]);
 
+      foreach($employees as &$employee)
+      {
+          $employee->ableToManage = $employee->employee_id === $_SESSION['user_id'];
+      }
+      $html .= MustacheProvider::get()->render("employee_list", ["employees" => $employees, "is_admin" => $_SESSION['admin']]);
       return $html;
     }
 
@@ -57,6 +63,17 @@ class EmployeeListPage extends CRUDPage
                     $data['alertType'] = 'danger';
                 }
                 break;
+            case self::ACTION_UPDATE:
+                if($success === 1)
+                {
+                    $data['message'] = 'Osoba byla upravena';
+                    $data['alertType'] = 'success';
+                }
+                else
+                {
+                    $data['message'] = 'Chyba při úpravě osoby';
+                    $data['alertType'] = 'danger';
+                }
         }
 
         return MustacheProvider::get()->render("alert", $data);

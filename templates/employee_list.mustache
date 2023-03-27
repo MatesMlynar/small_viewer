@@ -18,13 +18,18 @@
                 <td>{{job}}</td>
                 <td>
                     <form method="get" action="update.php">
-                        {{#admin}}
+                        {{#is_admin}}
                             <input type="submit" value="Editovat" class="btn btn-info">
-                        {{/admin}}
-                        {{^admin}}
-                            <input type="submit" value="Editovat" class="btn btn-info" disabled>
-                        {{/admin}}
-                        <input type="hidden" name="employee_id" value="{{room_id}}">
+                        {{/is_admin}}
+                        {{^is_admin}}
+                            {{#ableToManage}}
+                                    <input type="submit" value="Editovat" class="btn btn-info" >
+                            {{/ableToManage}}
+                            {{^ableToManage}}
+                                <input type="submit" value="Editovat" class="btn btn-info" disabled>
+                            {{/ableToManage}}
+                        {{/is_admin}}
+                        <input type="hidden" name="employee_id" value="{{employee_id}}">
                     </form>
                 </td>
                 <td>

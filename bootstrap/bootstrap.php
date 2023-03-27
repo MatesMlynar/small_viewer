@@ -12,6 +12,14 @@ spl_autoload_register(
 
 spl_autoload_register(
     function ($class_name) {
+        $filename =__DIR__ . "/../www/{$class_name}.php";
+        if (file_exists($filename))
+            include $filename;
+    }
+);
+
+spl_autoload_register(
+    function ($class_name) {
         $filename =__DIR__ . "/../models/{$class_name}.php";
         if (file_exists($filename))
             include $filename;

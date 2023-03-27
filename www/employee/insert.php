@@ -6,12 +6,14 @@ class EmployeeInsertPage extends CRUDPage
     public string $title = "Vytvořit novou osobu";
     protected int $state;
     private Employee $employee;
-    private array $errors;
+    private array $rooms = [];
 
 
     protected function prepareData(): void
     {
         parent::prepareData();
+        $this->rooms = Room::all();
+
         $this->state = $this->getState();
 
         switch ($this->state)
@@ -31,6 +33,7 @@ class EmployeeInsertPage extends CRUDPage
                 }
                 else
                 {
+                    $this->employee->appendSelected($this->rooms);
                     $this->state = self::STATE_FORM_REQUEST;
                 }
                 break;
@@ -38,20 +41,16 @@ class EmployeeInsertPage extends CRUDPage
 
     }
 
-
     protected function pageBody(): string
     {
         return MustacheProvider::get()->render("employee_form",
             [
                 'employee' => $this->employee,
                 'errors' => $this->errors,
-                'rooms' => Room::all()
+                'rooms' => $this->rooms,
             ]);
         //vyrenderuju
     }
-
-
-
 
     protected function getState() : int{
         if($_SERVER['REQUEST_METHOD'] === 'POST')

@@ -6,7 +6,6 @@ class Room
     public ?string $phone;
     public ?string $no;
 
-
     public function __construct(array $rawData = [])
     {
         $this->hydrate($rawData);
@@ -138,4 +137,10 @@ class Room
             'roomId' => $roomId,
         ]);
     }
+
+    public function ToArray() : array
+    {
+        return get_object_vars($this);
+    }
+
 }

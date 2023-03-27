@@ -37,7 +37,18 @@ class User extends Employee
 
         return null;
     }
-    
+
+    public static function findBySession() : User|null
+    {
+        $pdo = PDOProvider::get();
+        $user = $pdo->prepare("SELECT * FROM `employee` WHERE `employee_id`=:employeeID");
+        $user->execute(['employeeID' => $_SESSION['user_id']]);
+        $user = $user->fetch(PDO::FETCH_ASSOC);
+
+        return new User($user);
+    }
+
+
     public static function validateLogin($request, &$errors)
     {
         if (!$request['login'])
@@ -50,7 +61,15 @@ class User extends Employee
 
     public function isAdmin() : bool
     {
-        return $this->admin === 1;
+        return $this->admin === true;
     }
+
+    public function changePassword() : bool
+    {
+        echo "test";
+        return false;
+    }
+
+
 
 }

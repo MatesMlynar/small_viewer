@@ -23,7 +23,6 @@ class EmployeeDetailPage extends AuthenticatePage
         }
 
         $this->title = htmlspecialchars( "Zaměstnanec {$this->employee->name} ({$this->employee->surname})" );
-
     }
 
 

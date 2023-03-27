@@ -3,6 +3,8 @@
 
 abstract class AuthenticatePage extends Page
 {
+    protected ?User $user;
+
     protected function prepareData(): void
     {
         session_start();
@@ -11,6 +13,9 @@ abstract class AuthenticatePage extends Page
             header("Location: ../index.php?".http_build_query(['action' => "unauthenticated"]));
             exit();
         }
+
+        $this->user = User::findBySession();
+
     }
 }
 

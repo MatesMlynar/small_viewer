@@ -4,7 +4,7 @@ require_once "../../bootstrap/bootstrap.php";
 //FORM request se používá pro zobrazení formuláře pro úpravu místnosti (pokud se formulář pouze zobrazuje, je nastaven tento stav)
 //STATE_DATA_SENT - v případě, kdy se form. odesílá
 
-class RoomInsertPage extends CRUDPage
+class RoomUpdatePage extends CRUDPage
 {
     public string $title = "Upravit místnost";
     protected int $state;
@@ -72,5 +72,5 @@ class RoomInsertPage extends CRUDPage
 
 }
 
-$page = new RoomInsertPage();
+$page = new RoomUpdatePage();
 $page->render();

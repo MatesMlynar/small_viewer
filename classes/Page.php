@@ -3,7 +3,6 @@
 abstract class Page
 {
     public string $title;
-    protected ?User $user;
 
     protected function prepareData() : void {
 
