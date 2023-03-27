@@ -1,6 +1,8 @@
 <div class="container">
     <div>
-        <a class="btn btn-primary" href="insert.php">Vytvořit novou osobu</a>
+        {{#is_admin}}
+                <a class="btn btn-primary" href="insert.php">Vytvořit novou osobu</a>
+        {{/is_admin}}
     </div>
     <table class="table table-striped mt-3">
         <tr>
@@ -25,17 +27,21 @@
                             {{#ableToManage}}
                                     <input type="submit" value="Editovat" class="btn btn-info" >
                             {{/ableToManage}}
-                            {{^ableToManage}}
-                                <input type="submit" value="Editovat" class="btn btn-info" disabled>
-                            {{/ableToManage}}
                         {{/is_admin}}
                         <input type="hidden" name="employee_id" value="{{employee_id}}">
                     </form>
                 </td>
                 <td>
                     <form method="post" action="delete.php">
-                        <input type="submit" value="Smazat" class="btn btn-danger" onclick="return confirm('Opravdu chcete odebrat zaměstnance?')">
-                        <input type="hidden" name="employee_id" value="{{employee_id}}">
+                    {{#is_admin}}
+                        {{^ableToManage}}
+                            <input type="submit" value="Smazat" class="btn btn-danger" onclick="return confirm('Opravdu chcete odebrat zaměstnance?')">
+                            <input type="hidden" name="employee_id" value="{{employee_id}}">
+                        {{/ableToManage}}
+                        {{#ableToManage}}
+                            <input type="submit" disabled value="Smazat" class="btn btn-danger" onclick="return confirm('Opravdu chcete odebrat zaměstnance?')">
+                        {{/ableToManage}}
+                    {{/is_admin}}
                     </form>
                 </td>
             </tr>

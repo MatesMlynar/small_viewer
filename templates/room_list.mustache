@@ -1,13 +1,17 @@
 <div class="container">
     <div>
-        <a class="btn btn-primary" href="insert.php">Založit novou místnost</a>
+        {{#is_admin}}
+            <a class="btn btn-primary" href="insert.php">Založit novou místnost</a>
+        {{/is_admin}}
+
     </div>
     <table class="table table-striped mt-3">
         <tr>
             <th>Název</th>
             <th>Číslo</th>
             <th>Telefon</th>
-            <th colspan="2">Akce</th>
+            <th colspan="2">Akce - pouze správci</th>
+
         </tr>
         {{#rooms}}
             <tr>
@@ -16,19 +20,18 @@
                 <td>{{phone}}</td>
                 <td>
                     <form method="get" action="update.php">
-                        {{#admin}}
+                        {{#is_admin}}
                             <input type="submit" value="Editovat" class="btn btn-info">
-                        {{/admin}}
-                        {{^admin}}
-                            <input type="submit" value="Editovat" class="btn btn-info" disabled>
-                        {{/admin}}
+                        {{/is_admin}}
                         <input type="hidden" name="room_id" value="{{room_id}}">
                     </form>
                 </td>
                 <td>
                     <form method="post" action="delete.php">
-                        <input type="submit" value="Smazat" class="btn btn-danger" onclick="return confirm('Opravdu chcete smazat místnost?')">
-                        <input type="hidden" name="room_id" value="{{room_id}}">
+                        {{#is_admin}}
+                            <input type="submit" value="Smazat" class="btn btn-danger" onclick="return confirm('Opravdu chcete odebrat zaměstnance?')">
+                            <input type="hidden" name="room_id" value="{{room_id}}">
+                        {{/is_admin}}
                     </form>
                 </td>
             </tr>

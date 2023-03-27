@@ -15,7 +15,6 @@ abstract class AuthenticatePage extends Page
         }
 
         $this->user = User::findBySession();
-
     }
 }
 

@@ -48,6 +48,7 @@ class EmployeeInsertPage extends CRUDPage
                 'employee' => $this->employee,
                 'errors' => $this->errors,
                 'rooms' => $this->rooms,
+                'session_admin' => $_SESSION['admin'],
             ]);
         //vyrenderuju
     }

@@ -57,14 +57,13 @@ class EmployeeUpdatePage extends CRUDPage
 
     protected function pageBody(): string
     {
-        //pokud se jedná o přihlášeného uživatele, tak může spravovat své heslo
-
 
         return MustacheProvider::get()->render("employee_form",
             [
                 'employee' => $this->employee,
                 'errors' => $this->errors,
                 'rooms' => $this->rooms,
+                'employeeAdmin' => $this->employee->admin,
                 'session_admin' => $_SESSION['admin'],
             ]);
         //vyrenderuju

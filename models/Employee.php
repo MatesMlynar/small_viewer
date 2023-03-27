@@ -14,7 +14,7 @@ class Employee
     public ?array $employee_keys;
     public ?string $login;
     public ?string $password;
-    public ?bool $ableToManage;
+
 
     public function __construct(array $rawData = []){
         $this->hydrate($rawData);
@@ -25,7 +25,7 @@ class Employee
         if (array_key_exists('employee_id', $rawData))
             $this->employee_id = $rawData['employee_id'];
         if(array_key_exists('admin', $rawData))
-            $this->admin = $rawData['admin'] === true;
+            $this->admin = $rawData['admin'];
         if(array_key_exists('name', $rawData))
             $this->name = $rawData['name'];
         if(array_key_exists('surname', $rawData))
@@ -115,10 +115,26 @@ class Employee
         {
             $employee->employee_keys = array_map(function ($e) {return ['room_id' => $e];}, filter_input(INPUT_POST, 'keys', FILTER_DEFAULT, FILTER_REQUIRE_ARRAY));
         }
-        $employee->password = filter_input(INPUT_POST, 'password', FILTER_DEFAULT);
-        $employee->login = filter_input(INPUT_POST, 'login', FILTER_DEFAULT);
-        $employee->admin = filter_input(INPUT_POST, 'admin', FILTER_DEFAULT) === true;
 
+        $pdo = PDOProvider::get();
+        //pokud není posláno žádné heslo, tak původní hodnotu "aktualizujeme" původním heslem
+        $oldPasswordQuery = "select password from employee where `employee_id` = :employeeID";
+        $oldPasswordValue = $pdo->prepare($oldPasswordQuery);
+        $oldPasswordValue->execute(['employeeID' => $employee->employee_id]);
+        $stmt = $oldPasswordValue->fetch(PDO::FETCH_ASSOC);
+
+        $newPassword = filter_input(INPUT_POST, 'password', FILTER_DEFAULT);
+        if(isset($newPassword) && $newPassword !== "")
+        {
+            $employee->password = password_hash($newPassword, PASSWORD_DEFAULT);
+        }
+        else
+        {
+            $employee->password = $stmt['password'];
+        }
+
+        $employee->login = filter_input(INPUT_POST, 'login', FILTER_DEFAULT);
+        $employee->admin = filter_input(INPUT_POST, 'admin', FILTER_DEFAULT);
         return $employee;
     }
 
@@ -268,7 +284,6 @@ class Employee
     public function appendSelected(&$rooms)
     {
         $checkedRooms = array_map(function($e) {return $e['room_id'];}, $this->employee_keys);
-
 
         foreach($rooms as &$room)
         {

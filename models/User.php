@@ -64,12 +64,4 @@ class User extends Employee
         return $this->admin === true;
     }
 
-    public function changePassword() : bool
-    {
-        echo "test";
-        return false;
-    }
-
-
-
 }

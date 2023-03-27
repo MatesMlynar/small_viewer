@@ -1,0 +1,10 @@
+{
+  "db" : {
+    "host": "example",
+    "db": "example",
+    "user": "",
+    "pass" : "",
+    "charset" : "example"
+  },
+  "debug" : false
+}
