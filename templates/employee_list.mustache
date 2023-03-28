@@ -19,21 +19,16 @@
                 <td>{{room_phone}}</td>
                 <td>{{job}}</td>
                 <td>
+                    {{#is_admin}}
                     <form method="get" action="update.php">
-                        {{#is_admin}}
                             <input type="submit" value="Editovat" class="btn btn-info">
-                        {{/is_admin}}
-                        {{^is_admin}}
-                            {{#ableToManage}}
-                                    <input type="submit" value="Editovat" class="btn btn-info" >
-                            {{/ableToManage}}
-                        {{/is_admin}}
-                        <input type="hidden" name="employee_id" value="{{employee_id}}">
+                            <input type="hidden" name="employee_id" value="{{employee_id}}">
                     </form>
+                    {{/is_admin}}
                 </td>
                 <td>
-                    <form method="post" action="delete.php">
                     {{#is_admin}}
+                    <form method="post" action="delete.php">
                         {{^ableToManage}}
                             <input type="submit" value="Smazat" class="btn btn-danger" onclick="return confirm('Opravdu chcete odebrat zaměstnance?')">
                             <input type="hidden" name="employee_id" value="{{employee_id}}">
@@ -41,8 +36,8 @@
                         {{#ableToManage}}
                             <input type="submit" disabled value="Smazat" class="btn btn-danger" onclick="return confirm('Opravdu chcete odebrat zaměstnance?')">
                         {{/ableToManage}}
-                    {{/is_admin}}
                     </form>
+                    {{/is_admin}}
                 </td>
             </tr>
         {{/employees}}

@@ -99,7 +99,7 @@ class Room
 
     public function insert() : bool
     {
-        $query = "INSERT INTO `".self::$table."` (`name`, `no`, `phone`) VALUES (:name, :no, :phone);";
+        $query = "INSERT INTO room (`name`, `no`, `phone`) VALUES (:name, :no, :phone);";
         $pdo = PDOProvider::get();
 
         $stmt = $pdo->prepare($query);
@@ -113,7 +113,7 @@ class Room
 
     public function update() : bool
     {
-        $query = "UPDATE `".self::$table."` SET `name` = :name, `no` = :no, `phone` = :phone WHERE `room_id`=:roomId;";
+        $query = "UPDATE room SET `name` = :name, `no` = :no, `phone` = :phone WHERE `room_id`=:roomId;";
         $pdo = PDOProvider::get();
 
         $stmt = $pdo->prepare($query);
@@ -128,7 +128,7 @@ class Room
 
     public static function deleteById(int $roomId) : bool
     {
-        $query = "DELETE FROM `".self::$table."` WHERE `room_id` = :roomId";
+        $query = "DELETE FROM room WHERE `room_id` = :roomId";
 
         $pdo = PDOProvider::get();
 

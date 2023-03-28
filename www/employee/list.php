@@ -21,8 +21,10 @@ class EmployeeListPage extends CRUDPage
 
       foreach($employees as &$employee)
       {
+          //disable delete button pro přihlášeného uživatele (admina)
           $employee->ableToManage = $employee->employee_id === $_SESSION['user_id'];
       }
+
       $html .= MustacheProvider::get()->render("employee_list", ["employees" => $employees, "is_admin" => $_SESSION['admin']]);
       return $html;
     }
@@ -74,6 +76,22 @@ class EmployeeListPage extends CRUDPage
                     $data['message'] = 'Chyba při úpravě osoby';
                     $data['alertType'] = 'danger';
                 }
+                break;
+            default:
+                if($success === 1)
+                {
+                    $data['message'] = 'Heslo bylo změněno';
+                    $data['alertType'] = 'success';
+                    break;
+                }
+                else
+                {
+                    $data['message'] = 'Nastala chyba při změně hesla';
+                    $data['alertType'] = 'danger';
+                    break;
+                }
+                break;
+
         }
 
         return MustacheProvider::get()->render("alert", $data);

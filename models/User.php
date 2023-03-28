@@ -44,7 +44,6 @@ class User extends Employee
         $user = $pdo->prepare("SELECT * FROM `employee` WHERE `employee_id`=:employeeID");
         $user->execute(['employeeID' => $_SESSION['user_id']]);
         $user = $user->fetch(PDO::FETCH_ASSOC);
-
         return new User($user);
     }
 

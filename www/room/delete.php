@@ -11,8 +11,17 @@ class RoomDeletePage extends CRUDPage
         if (!$roomId)
             throw new BadRequestException();
 
-        $result = Room::deleteById($roomId);
-        $this->redirect(self::ACTION_DELETE, $result);
+        try{
+            $result = Room::deleteById($roomId);
+            $this->redirect(self::ACTION_DELETE, $result);
+        }
+        catch (Exception $e)
+        {
+            $e = new ForbiddenDelete();
+            $exceptionPage = new ExceptionPage($e);
+            $exceptionPage->render();
+            exit;
+        }
     }
 
 

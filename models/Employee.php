@@ -138,6 +138,17 @@ class Employee
         return $employee;
     }
 
+    public static function changePassword($userID, $password) : bool
+    {
+        $pdo = PDOProvider::get();
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+        $query = "UPDATE employee SET `password` = :password WHERE `employee_id` = :userID";
+        $employeeTableData = $pdo->prepare($query);
+
+        return $employeeTableData->execute(['password' => $hashedPassword, 'userID' => $userID]);
+    }
+
 
     public function validate(array &$errors = []) : bool
     {
@@ -227,7 +238,7 @@ class Employee
             'wage' => $this->wage,
             'login' => $this->login,
             'password' => $this->password,
-            'admin' => $this->admin,
+            'admin' => $this->admin ? "1" : "0",
         ]);
 
         //ziskame id zaměstnance (slouží pro přidání dat do tabulky keys)
@@ -250,6 +261,7 @@ class Employee
         $employeeTableQuery = "UPDATE employee SET `name` = :name, `surname` = :surname, `room` = :room, `job` = :job, `wage` = :wage, `login` = :login, `password` = :password, admin = :admin  WHERE `employee_id` = :employeeID";
         $employeeTableData = $pdo->prepare($employeeTableQuery);
 
+
         $success = $employeeTableData->execute([
             'name' => $this->name,
             'surname' => $this->surname,
@@ -259,7 +271,7 @@ class Employee
             'employeeID' => $this->employee_id,
             'login' => $this->login,
             'password' => $this->password,
-            'admin' => $this->admin,
+            'admin' => $this->admin ? "1" : "0",
         ]);
 
 

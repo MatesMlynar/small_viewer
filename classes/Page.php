@@ -19,14 +19,17 @@ abstract class Page
     protected function pageHeader() : string {
         $userName = "";
         $isLogged = false;
+        $isAdmin = false;
 
-        if(isset($_SESSION['userName']))
+        if(isset($_SESSION))
         {
             $userName = $_SESSION['userName'];
             $isLogged = true;
+            $isAdmin = $_SESSION['admin'];
         }
 
-        return MustacheProvider::get()->render("page_header", ["userName" => $userName, "loggedIn" => $isLogged]);
+
+        return MustacheProvider::get()->render("page_header", ["userName" => $userName, "loggedIn" => $isLogged, "is_admin" => $isAdmin]);
     }
 
     protected abstract function pageBody() : string;
