@@ -246,11 +246,15 @@ class Employee
         $employee_id = $employee_id->fetch(PDO::FETCH_ASSOC);
         $employee_id = $employee_id['max_id'];
 
-        foreach ($this->employee_keys as $key)
+        if(isset($this->employee_keys))
         {
-            $keyTableQuery = $pdo->prepare("INSERT INTO `key` (`room`, `employee`) VALUES (:room, :employee)");
-            $keyTableQuery->execute(['room' => $key['room_id'], 'employee' => $employee_id]);
+            foreach ($this->employee_keys as $key)
+            {
+                $keyTableQuery = $pdo->prepare("INSERT INTO `key` (`room`, `employee`) VALUES (:room, :employee)");
+                $keyTableQuery->execute(['room' => $key['room_id'], 'employee' => $employee_id]);
+            }
         }
+
 
         return $success;
     }
@@ -295,18 +299,22 @@ class Employee
 
     public function appendSelected(&$rooms)
     {
-        $checkedRooms = array_map(function($e) {return $e['room_id'];}, $this->employee_keys);
-
-        foreach($rooms as &$room)
+        if(isset($this->employee_keys))
         {
-            if($this->room_id === $room->room_id)
-            {
-                $room->is_room_selected = true;
-            }
+            $checkedRooms = array_map(function($e) {return $e['room_id'];}, $this->employee_keys);
 
-            $roomArray = $room->ToArray();
-            $room->is_key_selected = in_array($roomArray['room_id'], $checkedRooms);
+            foreach($rooms as &$room)
+            {
+                if($this->room_id === $room->room_id)
+                {
+                    $room->is_room_selected = true;
+                }
+
+                $roomArray = $room->ToArray();
+                $room->is_key_selected = in_array($roomArray['room_id'], $checkedRooms);
+            }
         }
+
 
     }
 }
