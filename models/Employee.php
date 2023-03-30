@@ -190,7 +190,7 @@ class Employee
                     //zjistim, zda stejny login jiz existuje
                     if ($stmt->rowCount() !== 0)
                     {
-                        $errors['login'] = "Tento přihlašovací login je již zabrán";
+                        $errors['login'] = "Tento login je již zabrán";
                         break;
                     }
                     else

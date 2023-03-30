@@ -58,9 +58,6 @@ class User extends Employee
         return count($errors) === 0;
     }
 
-    public function isAdmin() : bool
-    {
-        return $this->admin === true;
-    }
+
 
 }

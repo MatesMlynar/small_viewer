@@ -23,7 +23,7 @@ class IndexPage extends Page
                     session_start();
                     $_SESSION['userName'] = $this->user->name . " " . $this->user->surname;
                     $_SESSION['user_id'] = $this->user->employee_id;
-                    $_SESSION['admin'] = $this->user->isAdmin();
+                    $_SESSION['admin'] = $this->user->admin;
                     //presmerujeme
                     header("Location: /room/list.php");
                     exit;
