@@ -9,9 +9,14 @@ class User extends Employee
     public static function findByLogin(string $login, string $passwordPOST, &$errors) : User|null
     {
         $pdo = PDOProvider::get();
+
+        //do nově přihlášeného uživatele vložíme jeho sessionID
+        $sessionID = session_id();
+        $userSessionID = $pdo->prepare("UPDATE `employee` SET `session_id`=:sessionID WHERE `login`=:login");
+        $userSessionID->execute(['login' => $login, 'sessionID' => $sessionID]);
+
         $user = $pdo->prepare("SELECT * FROM `employee` WHERE `login`=:login");
         $user->execute(['login' => $login]);
-
         if($user->rowCount() < 1)
         {
             $errors['userNotFound'] = "Učet s těmito přihlašovacími údaji nebyl nalezen";
@@ -20,7 +25,6 @@ class User extends Employee
         else
         {
             $user = $user->fetch(PDO::FETCH_ASSOC);
-
             $userPasswordInDB = $user['password'];
 
             //porovnání hesel

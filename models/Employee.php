@@ -14,6 +14,7 @@ class Employee
     public ?array $employee_keys;
     public ?string $login;
     public ?string $password;
+    public ?string $session_id;
 
 
     public function __construct(array $rawData = []){
@@ -46,13 +47,16 @@ class Employee
             $this->password = $rawData['password'];
         if(array_key_exists('login', $rawData))
             $this->login = $rawData['login'];
+        if(array_key_exists('session_id', $rawData))
+            $this->session_id = $rawData['session_id'];
+
     }
 
     public static function all() : array{
 
         $pdo = PDOProvider::get();
 
-        $query = "select admin, CONCAT(employee.name,' ',employee.surname,' ') as 'name', room.name as 'room_name', room.phone as 'room_phone', employee.job as 'job', employee_id from employee join room on employee.room = room_id";
+        $query = "select admin, CONCAT(employee.name,' ',employee.surname,' ') as 'name', room.name as 'room_name', room.phone as 'room_phone', employee.job as 'job', employee_id, session_id from employee join room on employee.room = room_id";
         $stmt = $pdo->query($query);
 
         $result = [];
@@ -69,7 +73,7 @@ class Employee
     {
         $pdo = PDOProvider::get();
 
-        $employeeQuery = $pdo->prepare("select login, password, admin, room as 'room_id', employee_id, employee.name as 'name', surname, job, wage, room.name as 'room_name' from employee join room on employee.room = room.room_id where `employee`.`employee_id`=:employeeID");
+        $employeeQuery = $pdo->prepare("select login, password, admin, room as 'room_id', employee_id, employee.name as 'name', surname, job, wage, room.name as 'room_name', session_id from employee join room on employee.room = room.room_id where `employee`.`employee_id`=:employeeID");
         $employeeQuery->execute(['employeeID' => $id]);
 
         $employee_keysQuery = $pdo->prepare("select room.name as 'keys', room.room_id as 'room_id' from room join `key` on room.room_id = `key`.room where `key`.`employee`=:employeeID");
@@ -84,20 +88,33 @@ class Employee
     }
 
 
-    public static function deleteById($id) : bool
+    public static function deleteById($id, $loggedUserID) : bool
     {
         $pdo = PDOProvider::get();
+        $success = false;
 
-        //smazat všechny klíče, které jsou propojeny s daty v tabulce "employee"
-        $keyQuery = "DELETE FROM `key` WHERE employee=:employeeID";
-        $keySTMT = $pdo->prepare($keyQuery);
-        $keySTMT->execute(['employeeID' => $id]);
+        if($id === $loggedUserID)
+        {
+            $e = new ForbiddenEmployeeDelete();
+            $exceptionPage = new ExceptionPage($e);
+            $exceptionPage->render();
+            exit;
+        }
+        else
+        {
+            //smazat všechny klíče, které jsou propojeny s daty v tabulce "employee"
+            $keyQuery = "DELETE FROM `key` WHERE employee=:employeeID";
+            $keySTMT = $pdo->prepare($keyQuery);
+            $keySTMT->execute(['employeeID' => $id]);
 
-        //smazat samotnou osobu
-        $query = "DELETE FROM employee WHERE employee_id=:employeeID";
+            //smazat samotnou osobu
+            $query = "DELETE FROM employee WHERE employee_id=:employeeID";
 
-        $stmt = $pdo->prepare($query);
-        return $stmt->execute(['employeeID' => $id]);
+            $stmt = $pdo->prepare($query);
+            $success = $stmt->execute(['employeeID' => $id]);
+        }
+
+        return $success;
     }
 
     public static function readPost() : Employee
@@ -259,12 +276,13 @@ class Employee
         return $success;
     }
 
-    public function update() : bool {
+    public function update($loggedUserSessionID) : bool {
         $pdo = PDOProvider::get();
-
         $employeeTableQuery = "UPDATE employee SET `name` = :name, `surname` = :surname, `room` = :room, `job` = :job, `wage` = :wage, `login` = :login, `password` = :password, admin = :admin  WHERE `employee_id` = :employeeID";
         $employeeTableData = $pdo->prepare($employeeTableQuery);
 
+        $session_id_to_destroyQuery = $pdo->query("select session_id from employee where employee_id=$this->employee_id");
+        $session_id_to_destroy = $session_id_to_destroyQuery->fetch(PDO::FETCH_ASSOC);
 
         $success = $employeeTableData->execute([
             'name' => $this->name,
@@ -293,6 +311,28 @@ class Employee
                 $keyTableQuery->execute(['room' => $key['room_id'], 'employee' => $this->employee_id]);
             }
         }
+
+        //hijack
+        if (session_id()) {
+            session_commit();
+        }
+
+        session_start();
+        $currectSessionID = session_id();
+        session_commit();
+        if($loggedUserSessionID != $session_id_to_destroy['session_id'])
+        {
+            session_id($session_id_to_destroy['session_id']);
+            session_start();
+            session_destroy();
+            session_commit();
+
+            //obnovím původní session
+            session_id($currectSessionID);
+            session_start();
+            session_commit();
+        }
+
         return $success;
     }
 

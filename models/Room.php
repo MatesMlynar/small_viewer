@@ -128,12 +128,18 @@ class Room
 
     public static function deleteById(int $roomId) : bool
     {
-        $query = "DELETE FROM room WHERE `room_id` = :roomId";
-
         $pdo = PDOProvider::get();
+        //smazat všechny klíče, které se pojily k dané místnosti
+        $queryKEYS = 'DELETE FROM `key` WHERE `room` = :roomID';
+        $stmtKEYS = $pdo->prepare($queryKEYS);
+        $stmtKEYS->execute([
+            'roomID' => $roomId,
+        ]);
 
-        $stmt = $pdo->prepare($query);
-        return $stmt->execute([
+        //smažeme místnost
+        $queryROOM = "DELETE FROM room WHERE `room_id` = :roomId";
+        $stmtROOM = $pdo->prepare($queryROOM);
+        return $stmtROOM->execute([
             'roomId' => $roomId,
         ]);
     }

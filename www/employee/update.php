@@ -39,7 +39,7 @@ class EmployeeUpdatePage extends CRUDPage
                 if ($this->employee->validate($this->errors))
                 {
                     //zpracovat
-                    $result = $this->employee->update();
+                    $result = $this->employee->update($this->user->session_id);
                     //přesměrovat
                     $this->redirect(self::ACTION_UPDATE, $result);
                 }

@@ -15,12 +15,13 @@ class IndexPage extends Page
 
             if(User::validateLogin($_POST, $this->errors))
             {
+                session_start();
                 $userLogin = filter_input(INPUT_POST, "login");
                 $userPassword = filter_input(INPUT_POST, "password");
                 $this->user = User::findByLogin($userLogin,$userPassword, $this->errors);
+
                 if(isset($this->user))
                 {
-                    session_start();
                     $_SESSION['userName'] = $this->user->name . " " . $this->user->surname;
                     $_SESSION['user_id'] = $this->user->employee_id;
                     $_SESSION['admin'] = $this->user->admin;
