@@ -5,23 +5,25 @@ class IndexPage extends Page
 {
     public string $title = "Prohlížeč databáze";
     private array $errors;
-    private $predefinedFormLogin = "";
+    private string $userLogin = "";
     protected ?User $user;
 
     protected function prepareData(): void
     {
+        $_SESSION['userName'] = "";
+        $_SESSION['admin'] = false;
+
         $this->errors = [];
         if($_POST){
 
             if(User::validateLogin($_POST, $this->errors))
             {
-                session_start();
                 $userLogin = filter_input(INPUT_POST, "login");
                 $userPassword = filter_input(INPUT_POST, "password");
                 $this->user = User::findByLogin($userLogin,$userPassword, $this->errors);
-
                 if(isset($this->user))
                 {
+                    session_start();
                     $_SESSION['userName'] = $this->user->name . " " . $this->user->surname;
                     $_SESSION['user_id'] = $this->user->employee_id;
                     $_SESSION['admin'] = $this->user->admin;
@@ -31,7 +33,7 @@ class IndexPage extends Page
                 }
             }
 
-            $this->predefinedFormLogin = $userLogin;
+            $this->userLogin = filter_input(INPUT_POST, "login");
         }
     }
 
@@ -41,7 +43,7 @@ class IndexPage extends Page
 
         /*$rooms = Room::all(['phone' => 'DESC']);*/
 
-        $html .= MustacheProvider::get()->render("index", ['errors' => $this->errors, 'predefinedLogin' => $this->predefinedFormLogin]);
+        $html .= MustacheProvider::get()->render("index", ['errors' => $this->errors, 'predefinedLogin' => $this->userLogin]);
 
         return $html;
     }

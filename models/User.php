@@ -52,7 +52,7 @@ class User extends Employee
     }
 
 
-    public static function validateLogin($request, &$errors)
+    public static function validateLogin($request, &$errors) : bool
     {
         if (!$request['login'])
             $errors['login'] = "Uživatelské jméno nemůže být prázdné!";
