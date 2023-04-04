@@ -10,11 +10,10 @@ class IndexPage extends Page
 
     protected function prepareData(): void
     {
-        $_SESSION['userName'] = "";
-        $_SESSION['admin'] = false;
-
         $this->errors = [];
         if($_POST){
+
+            session_start();
 
             if(User::validateLogin($_POST, $this->errors))
             {
@@ -23,7 +22,6 @@ class IndexPage extends Page
                 $this->user = User::findByLogin($userLogin,$userPassword, $this->errors);
                 if(isset($this->user))
                 {
-                    session_start();
                     $_SESSION['userName'] = $this->user->name . " " . $this->user->surname;
                     $_SESSION['user_id'] = $this->user->employee_id;
                     $_SESSION['admin'] = $this->user->admin;
