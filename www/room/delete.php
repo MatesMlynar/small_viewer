@@ -7,20 +7,30 @@ class RoomDeletePage extends CRUDPage
     protected function prepareData(): void
     {
         parent::prepareData();
-        $roomId = filter_input(INPUT_POST, 'room_id', FILTER_VALIDATE_INT);
-        if (!$roomId)
-            throw new BadRequestException();
 
-        try{
-            $result = Room::deleteById($roomId);
-            $this->redirect(self::ACTION_DELETE, $result);
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
         }
-        catch (Exception $e)
+        if($_SESSION['admin'])
         {
-            $e = new ForbiddenDelete();
-            $exceptionPage = new ExceptionPage($e);
-            $exceptionPage->render();
-            exit;
+            $roomId = filter_input(INPUT_POST, 'room_id', FILTER_VALIDATE_INT);
+            if (!$roomId)
+                throw new BadRequestException();
+
+            try{
+                $result = Room::deleteById($roomId);
+                $this->redirect(self::ACTION_DELETE, $result);
+            }
+            catch (Exception $e)
+            {
+                $e = new ForbiddenDelete();
+                $exceptionPage = new ExceptionPage($e);
+                $exceptionPage->render();
+                exit;
+            }
+        }
+        else{
+            throw new UnauthorizedException();
         }
     }
 

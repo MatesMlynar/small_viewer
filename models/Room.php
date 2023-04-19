@@ -97,33 +97,46 @@ class Room
         return count($errors) === 0;
     }
 
-    public function insert() : bool
+    public function insert(&$errors) : bool
     {
         $query = "INSERT INTO room (`name`, `no`, `phone`) VALUES (:name, :no, :phone);";
         $pdo = PDOProvider::get();
 
         $stmt = $pdo->prepare($query);
-        return $stmt->execute([
-            'name' => $this->name,
-            'no' => $this->no,
-            'phone' => $this->phone
-        ]);
+        try {
+            return $stmt->execute([
+                'name' => $this->name,
+                'no' => $this->no,
+                'phone' => $this->phone
+            ]);
+        } catch (Exception $e)
+        {
+            $errors['no'] = "číslo je již zabráno jinou místností";
+        }
 
+        return false;
     }
 
-    public function update() : bool
+    public function update(&$errors) : bool
     {
         $query = "UPDATE room SET `name` = :name, `no` = :no, `phone` = :phone WHERE `room_id`=:roomId;";
         $pdo = PDOProvider::get();
 
         $stmt = $pdo->prepare($query);
-        return $stmt->execute([
-            'roomId' => $this->room_id,
-            'name' => $this->name,
-            'no' => $this->no,
-            'phone' => $this->phone
-        ]);
+        try {
+            return $stmt->execute([
+                'roomId' => $this->room_id,
+                'name' => $this->name,
+                'no' => $this->no,
+                'phone' => $this->phone
+            ]);
+        }
+        catch (Exception $e)
+        {
+            $errors['no'] = "číslo je již zabráno jinou místností";
+        }
 
+        return false;
     }
 
     public static function deleteById(int $roomId) : bool

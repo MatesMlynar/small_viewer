@@ -10,10 +10,7 @@ class User extends Employee
     {
         $pdo = PDOProvider::get();
 
-        //do nově přihlášeného uživatele vložíme jeho sessionID
-        $sessionID = session_id();
-        $userSessionID = $pdo->prepare("UPDATE `employee` SET `session_id`=:sessionID WHERE `login`=:login");
-        $userSessionID->execute(['login' => $login, 'sessionID' => $sessionID]);
+
 
         $user = $pdo->prepare("SELECT * FROM `employee` WHERE `login`=:login");
         $user->execute(['login' => $login]);
@@ -30,6 +27,10 @@ class User extends Employee
             //porovnání hesel
             if(password_verify($passwordPOST, $userPasswordInDB))
             {
+                //do nově přihlášeného uživatele vložíme jeho sessionID
+                $sessionID = session_id();
+                $userSessionID = $pdo->prepare("UPDATE `employee` SET `session_id`=:sessionID WHERE `login`=:login");
+                $userSessionID->execute(['login' => $login, 'sessionID' => $sessionID]);
                 return new User($user);
             }
             else{

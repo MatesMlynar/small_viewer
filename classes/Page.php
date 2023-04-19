@@ -21,7 +21,7 @@ abstract class Page
         $isLogged = false;
         $isAdmin = false;
 
-        if(isset($_SESSION))
+        if(!empty($_SESSION))
         {
             $userName = $_SESSION['userName'];
             $isLogged = true;

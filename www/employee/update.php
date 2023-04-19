@@ -13,58 +13,67 @@ class EmployeeUpdatePage extends CRUDPage
     protected function prepareData(): void
     {
         parent::prepareData();
-        $this->rooms = Room::all();
-        $this->state = $this->getState();
 
-        switch ($this->state) {
-            case self::STATE_FORM_REQUEST:
-                $employeeId = filter_input(INPUT_GET, 'employee_id', FILTER_VALIDATE_INT);
-                if (!$employeeId)
-                    throw new BadRequestException();
-
-                $this->employee = Employee::findByID($employeeId);
-
-                if (!$this->employee)
-                    throw new NotFoundException();
-
-                $this->employee->appendSelected($this->rooms);
-                $this->errors = [];
-                break;
-
-            case self::STATE_DATA_SENT:
-                //načíst data
-                $this->employee = Employee::readPost();
-                //zkontrolovat data
-                $this->errors = [];
-                if ($this->employee->validate($this->errors))
-                {
-                    //zpracovat
-                    $result = $this->employee->update($this->user->session_id);
-                    //přesměrovat
-                    $this->redirect(self::ACTION_UPDATE, $result);
-                }
-                else
-                {
-                    $this->employee->appendSelected($this->rooms);
-                    $this->state = self::STATE_FORM_REQUEST;
-                }
-                break;
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
         }
+        if($_SESSION['admin'])
+        {
+            $this->rooms = Room::all();
+            $this->state = $this->getState();
+
+            switch ($this->state) {
+                case self::STATE_FORM_REQUEST:
+                    $employeeId = filter_input(INPUT_GET, 'employee_id', FILTER_VALIDATE_INT);
+                    if (!$employeeId)
+                        throw new BadRequestException();
+
+                    $this->employee = Employee::findByID($employeeId);
+
+                    if (!$this->employee)
+                        throw new NotFoundException();
+
+                    $this->employee->appendSelected($this->rooms);
+                    $this->errors = [];
+                    break;
+
+                case self::STATE_DATA_SENT:
+                    //načíst data
+                    $this->employee = Employee::readPost();
+                    //zkontrolovat data
+                    $this->errors = [];
+                    if ($this->employee->validate($this->errors))
+                    {
+                        //zpracovat
+                        $result = $this->employee->update($this->user->session_id);
+                        //přesměrovat
+                        $this->redirect(self::ACTION_UPDATE, $result);
+                    }
+                    else
+                    {
+                        $this->employee->appendSelected($this->rooms);
+                        $this->state = self::STATE_FORM_REQUEST;
+                    }
+                    break;
+            }
+        }
+        else{
+            throw new UnauthorizedException();
+        }
+
     }
 
 
     protected function pageBody(): string
     {
-
-        return MustacheProvider::get()->render("employee_form",
-            [
-                'employee' => $this->employee,
-                'errors' => $this->errors,
-                'rooms' => $this->rooms,
-                'employeeAdmin' => $this->employee->admin,
-                'session_admin' => $_SESSION['admin'],
-            ]);
-        //vyrenderuju
+            return MustacheProvider::get()->render("employee_form",
+                [
+                    'employee' => $this->employee,
+                    'errors' => $this->errors,
+                    'rooms' => $this->rooms,
+                    'employeeAdmin' => $this->employee->admin,
+                    'session_admin' => $_SESSION['admin'],
+                ]);
     }
 
     protected function getState() : int

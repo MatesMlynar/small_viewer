@@ -11,33 +11,44 @@ class RoomInsertPage extends CRUDPage
     protected function prepareData(): void
     {
         parent::prepareData();
-        $this->state = $this->getState();
 
-        switch ($this->state) {
-            case self::STATE_FORM_REQUEST:
-                $this->room = new Room();
-                $this->errors = [];
-                break;
+        if($_SESSION['admin'])
+        {
+            $this->state = $this->getState();
 
-            case self::STATE_DATA_SENT:
-                //načíst data
-                $this->room = Room::readPost();
-                //zkontrolovat data
-                $this->errors = [];
-                if ($this->room->validate($this->errors))
-                {
-                    //zpracovat
-                    $result = $this->room->insert();
-                    //přesměrovat
-                    $this->redirect(self::ACTION_INSERT, $result);
-                }
-                else
-                {
-                    //na formulář
-                    $this->state = self::STATE_FORM_REQUEST;
-                }
-                break;
+            switch ($this->state) {
+                case self::STATE_FORM_REQUEST:
+                    $this->room = new Room();
+                    $this->errors = [];
+                    break;
+
+                case self::STATE_DATA_SENT:
+                    //načíst data
+                    $this->room = Room::readPost();
+                    //zkontrolovat data
+                    $this->errors = [];
+                    if ($this->room->validate($this->errors))
+                    {
+                        //zpracovat
+                        $result = $this->room->insert($this->errors);
+                        //přesměrovat
+                        if($result)
+                        {
+                            $this->redirect(self::ACTION_INSERT, $result);
+                        }
+                    }
+                    else
+                    {
+                        //na formulář
+                        $this->state = self::STATE_FORM_REQUEST;
+                    }
+                    break;
+            }
         }
+        else{
+            throw new UnauthorizedException();
+        }
+
     }
 
 

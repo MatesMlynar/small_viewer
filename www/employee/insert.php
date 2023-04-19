@@ -12,31 +12,38 @@ class EmployeeInsertPage extends CRUDPage
     protected function prepareData(): void
     {
         parent::prepareData();
-        $this->rooms = Room::all();
 
-        $this->state = $this->getState();
-
-        switch ($this->state)
+        if($_SESSION['admin'])
         {
-            case self::STATE_FORM_REQUEST:
-                $this->employee = new Employee();
-                $this->errors = [];
-                break;
+            $this->rooms = Room::all();
 
-            case self::STATE_DATA_SENT:
-                $this->employee = Employee::readPost();
-                $this->errors = [];
-                if($this->employee->validate($this->errors))
-                {
-                    $result = $this->employee->insert();
-                    $this->redirect(self::ACTION_INSERT, $result);
-                }
-                else
-                {
-                    $this->employee->appendSelected($this->rooms);
-                    $this->state = self::STATE_FORM_REQUEST;
-                }
-                break;
+            $this->state = $this->getState();
+
+            switch ($this->state)
+            {
+                case self::STATE_FORM_REQUEST:
+                    $this->employee = new Employee();
+                    $this->errors = [];
+                    break;
+
+                case self::STATE_DATA_SENT:
+                    $this->employee = Employee::readPost();
+                    $this->errors = [];
+                    if($this->employee->validate($this->errors))
+                    {
+                        $result = $this->employee->insert();
+                        $this->redirect(self::ACTION_INSERT, $result);
+                    }
+                    else
+                    {
+                        $this->employee->appendSelected($this->rooms);
+                        $this->state = self::STATE_FORM_REQUEST;
+                    }
+                    break;
+            }
+        }
+        else{
+            throw new UnauthorizedException();
         }
 
     }
@@ -50,7 +57,6 @@ class EmployeeInsertPage extends CRUDPage
                 'rooms' => $this->rooms,
                 'session_admin' => $_SESSION['admin'],
             ]);
-        //vyrenderuju
     }
 
     protected function getState() : int{

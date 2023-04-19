@@ -86,7 +86,8 @@
         <div class="form-group ">
             <label for="keys">Zvolte klíče: </label>
                 {{#rooms}}
-                    <input type="checkbox" name="keys[]" value="{{room_id}}"  {{#is_key_selected}}checked{{/is_key_selected}}/> {{name}}
+                    <input type="checkbox" id="key" name="keys[]" value="{{room_id}}"  {{#is_key_selected}}checked{{/is_key_selected}}/>
+                    <label for="key">{{name}}</label>
                 {{/rooms}}
             {{#errors.room_name}}<div class="d-block invalid-feedback">{{errors.room_name}}</div>{{/errors.room_name}}
         </div>

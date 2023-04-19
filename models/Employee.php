@@ -90,31 +90,32 @@ class Employee
 
     public static function deleteById($id, $loggedUserID) : bool
     {
-        $pdo = PDOProvider::get();
-        $success = false;
 
-        if($id === $loggedUserID)
-        {
-            $e = new ForbiddenEmployeeDelete();
-            $exceptionPage = new ExceptionPage($e);
-            $exceptionPage->render();
-            exit;
-        }
-        else
-        {
-            //smazat všechny klíče, které jsou propojeny s daty v tabulce "employee"
-            $keyQuery = "DELETE FROM `key` WHERE employee=:employeeID";
-            $keySTMT = $pdo->prepare($keyQuery);
-            $keySTMT->execute(['employeeID' => $id]);
+            $pdo = PDOProvider::get();
+            $success = false;
 
-            //smazat samotnou osobu
-            $query = "DELETE FROM employee WHERE employee_id=:employeeID";
+            if($id === $loggedUserID)
+            {
+                $e = new ForbiddenEmployeeDelete();
+                $exceptionPage = new ExceptionPage($e);
+                $exceptionPage->render();
+                exit;
+            }
+            else
+            {
+                //smazat všechny klíče, které jsou propojeny s daty v tabulce "employee"
+                $keyQuery = "DELETE FROM `key` WHERE employee=:employeeID";
+                $keySTMT = $pdo->prepare($keyQuery);
+                $keySTMT->execute(['employeeID' => $id]);
 
-            $stmt = $pdo->prepare($query);
-            $success = $stmt->execute(['employeeID' => $id]);
-        }
+                //smazat samotnou osobu
+                $query = "DELETE FROM employee WHERE employee_id=:employeeID";
 
-        return $success;
+                $stmt = $pdo->prepare($query);
+                $success = $stmt->execute(['employeeID' => $id]);
+            }
+
+            return $success;
     }
 
     public static function readPost() : Employee
@@ -155,15 +156,43 @@ class Employee
         return $employee;
     }
 
-    public static function changePassword($userID, $password) : bool
+    public static function changePassword($userID, $newPassword, $oldPassword,$newPasswordCheck, array &$errors = []) : bool
     {
         $pdo = PDOProvider::get();
-        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        $oldPasswordDB = $pdo->prepare("select password from employee where employee_id=:userID");
+        $oldPasswordDB->execute(['userID' => $userID]);
+        $oldPasswordDBV = $oldPasswordDB->fetch(PDO::FETCH_ASSOC);
 
-        $query = "UPDATE employee SET `password` = :password WHERE `employee_id` = :userID";
-        $employeeTableData = $pdo->prepare($query);
+        if(!empty($oldPassword) && !empty($newPassword) && !empty($newPasswordCheck))
+        {
+            if(password_verify($oldPassword, $oldPasswordDBV['password']))
+            {
+                if($newPasswordCheck === $newPassword)
+                {
+                    $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
 
-        return $employeeTableData->execute(['password' => $hashedPassword, 'userID' => $userID]);
+                    $query = "UPDATE employee SET `password` = :password WHERE `employee_id` = :userID";
+                    $employeeTableData = $pdo->prepare($query);
+
+                    return $employeeTableData->execute(['password' => $hashedPassword, 'userID' => $userID]);
+                }
+                else
+                {
+                    $errors['password'] = "Nová hesla se neshodují";
+                }
+            }
+            else{
+                $errors['password'] = "Špatně zadané původní heslo";
+            }
+        }
+        else{
+            $errors['password'] = "Pole pro hesla musí být vyplněna";
+        }
+
+
+
+
+        return false;
     }
 
 
@@ -189,10 +218,18 @@ class Employee
         if (!$this->job)
             $errors['job'] = "Pozice nemůže být prázdná";
 
-        if (is_int($this->wage))
-            $this->wage = trim($this->wage);
+        if (is_int($this->wage)){
+            if($this->wage < 0){
+                $errors['wage'] = "Plat nesmí být záporný";
+            }
+            else
+            {
+                $this->wage = trim($this->wage);
+            }
+        }
         if (!$this->wage)
-            $errors['wage'] = "Plat nemůže být prázdný a musí mít hodnotu celého čísla";
+            $errors['wage'] .= "Plat nemůže být prázdný a musí mít hodnotu celého nezáporného čísla";
+
 
         if (is_string($this->login)){
             //bereme data z databaze kvuli loginu, aby nevznikla duplikace (login by mel byt unikatni)
@@ -241,99 +278,100 @@ class Employee
 
     public function insert() : bool
     {
-        $pdo = PDOProvider::get();
+            $pdo = PDOProvider::get();
 
-        //budeme vkladat vse krome klice do tabulky employee
-        $employeeTableQuery = "INSERT INTO employee (`name`, `surname`, `room`, `job`, `wage`, `login`, `password`, `admin`) VALUES (:name, :surname, :room, :job, :wage, :login, :password, :admin);";
+            //budeme vkladat vse krome klice do tabulky employee
+            $employeeTableQuery = "INSERT INTO employee (`name`, `surname`, `room`, `job`, `wage`, `login`, `password`, `admin`) VALUES (:name, :surname, :room, :job, :wage, :login, :password, :admin);";
 
-        $employeeTableData = $pdo->prepare($employeeTableQuery);
-        $success = $employeeTableData->execute([
-            'name' => $this->name,
-            'surname' => $this->surname,
-            'room' => $this->room_id,
-            'job' => $this->job,
-            'wage' => $this->wage,
-            'login' => $this->login,
-            'password' => $this->password,
-            'admin' => $this->admin ? "1" : "0",
-        ]);
+            $employeeTableData = $pdo->prepare($employeeTableQuery);
+            $success = $employeeTableData->execute([
+                'name' => $this->name,
+                'surname' => $this->surname,
+                'room' => $this->room_id,
+                'job' => $this->job,
+                'wage' => $this->wage,
+                'login' => $this->login,
+                'password' => $this->password,
+                'admin' => $this->admin ? "1" : "0",
+            ]);
 
-        //ziskame id zaměstnance (slouží pro přidání dat do tabulky keys)
-        $employee_id = $pdo->query("SELECT max(employee_id) as max_id FROM employee");
-        $employee_id = $employee_id->fetch(PDO::FETCH_ASSOC);
-        $employee_id = $employee_id['max_id'];
+            //ziskame id zaměstnance (slouží pro přidání dat do tabulky keys)
+            $employee_id = $pdo->query("SELECT max(employee_id) as max_id FROM employee");
+            $employee_id = $employee_id->fetch(PDO::FETCH_ASSOC);
+            $employee_id = $employee_id['max_id'];
 
-        if(isset($this->employee_keys))
-        {
-            foreach ($this->employee_keys as $key)
+            if(isset($this->employee_keys))
             {
-                $keyTableQuery = $pdo->prepare("INSERT INTO `key` (`room`, `employee`) VALUES (:room, :employee)");
-                $keyTableQuery->execute(['room' => $key['room_id'], 'employee' => $employee_id]);
+                foreach ($this->employee_keys as $key)
+                {
+                    $keyTableQuery = $pdo->prepare("INSERT INTO `key` (`room`, `employee`) VALUES (:room, :employee)");
+                    $keyTableQuery->execute(['room' => $key['room_id'], 'employee' => $employee_id]);
+                }
             }
-        }
 
-
-        return $success;
+            return $success;
     }
 
     public function update($loggedUserSessionID) : bool {
-        $pdo = PDOProvider::get();
-        $employeeTableQuery = "UPDATE employee SET `name` = :name, `surname` = :surname, `room` = :room, `job` = :job, `wage` = :wage, `login` = :login, `password` = :password, admin = :admin  WHERE `employee_id` = :employeeID";
-        $employeeTableData = $pdo->prepare($employeeTableQuery);
 
-        $session_id_to_destroyQuery = $pdo->query("select session_id from employee where employee_id=$this->employee_id");
-        $session_id_to_destroy = $session_id_to_destroyQuery->fetch(PDO::FETCH_ASSOC);
+            $pdo = PDOProvider::get();
+            $employeeTableQuery = "UPDATE employee SET `name` = :name, `surname` = :surname, `room` = :room, `job` = :job, `wage` = :wage, `login` = :login, `password` = :password, admin = :admin  WHERE `employee_id` = :employeeID";
+            $employeeTableData = $pdo->prepare($employeeTableQuery);
 
-        $success = $employeeTableData->execute([
-            'name' => $this->name,
-            'surname' => $this->surname,
-            'room' => $this->room_id,
-            'job' => $this->job,
-            'wage' => $this->wage,
-            'employeeID' => $this->employee_id,
-            'login' => $this->login,
-            'password' => $this->password,
-            'admin' => $this->admin ? "1" : "0",
-        ]);
+            $session_id_to_destroyQuery = $pdo->query("select session_id from employee where employee_id=$this->employee_id");
+            $session_id_to_destroy = $session_id_to_destroyQuery->fetch(PDO::FETCH_ASSOC);
+
+            $success = $employeeTableData->execute([
+                'name' => $this->name,
+                'surname' => $this->surname,
+                'room' => $this->room_id,
+                'job' => $this->job,
+                'wage' => $this->wage,
+                'employeeID' => $this->employee_id,
+                'login' => $this->login,
+                'password' => $this->password,
+                'admin' => $this->admin ? "1" : "0",
+            ]);
 
 
-        //smažu všechny klíče, které měl uživatel doposud a přepíšu je
-        $query = "DELETE FROM `key` WHERE employee=:employeeID";
-        $stmt = $pdo->prepare($query);
-        $stmt->execute(['employeeID' => $this->employee_id]);
+            //smažu všechny klíče, které měl uživatel doposud a přepíšu je
+            $query = "DELETE FROM `key` WHERE employee=:employeeID";
+            $stmt = $pdo->prepare($query);
+            $stmt->execute(['employeeID' => $this->employee_id]);
 
-        //přidám nový výběr klíčů
-        if(isset($this->employee_keys))
-        {
-            foreach ($this->employee_keys as $key)
+            //přidám nový výběr klíčů
+            if(isset($this->employee_keys))
             {
-                $keyTableQuery = $pdo->prepare("INSERT INTO `key` (`room`, `employee`) VALUES (:room, :employee)");
-                $keyTableQuery->execute(['room' => $key['room_id'], 'employee' => $this->employee_id]);
+                foreach ($this->employee_keys as $key)
+                {
+                    $keyTableQuery = $pdo->prepare("INSERT INTO `key` (`room`, `employee`) VALUES (:room, :employee)");
+                    $keyTableQuery->execute(['room' => $key['room_id'], 'employee' => $this->employee_id]);
+                }
             }
-        }
 
-        //hijack
-        if (session_id()) {
-            session_commit();
-        }
-
-        session_start();
-        $currectSessionID = session_id();
-        session_commit();
-        if($loggedUserSessionID != $session_id_to_destroy['session_id'])
-        {
-            session_id($session_id_to_destroy['session_id']);
+            //hijack
+            if (session_id()) {
+                session_commit();
+            }
             session_start();
-            session_destroy();
+            $currectSessionID = session_id();
             session_commit();
+            if($loggedUserSessionID !== $session_id_to_destroy['session_id'] && $session_id_to_destroy['session_id'] != null)
+            {
+                session_id($session_id_to_destroy['session_id']);
+                session_start();
+                session_destroy();
+                session_commit();
 
-            //obnovím původní session
-            session_id($currectSessionID);
-            session_start();
-            session_commit();
-        }
+                //obnovím původní session
+                session_id($currectSessionID);
+                session_start();
+            }
 
-        return $success;
+
+            return $success;
+
+
     }
 
 
